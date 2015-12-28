@@ -11,15 +11,51 @@ layout: default
       </div>
          <div class="col-xs-12">
             <div id="intro">
-         <p>SIP LIb is a powerful SIP library for framing &amp; parsing SIP messages with a fluent API and immutable objects. SIP Lib is part of pkts.io and is designed to be used as a standalone module, either for building your own SIP stack from scratch, or developing your own tools for parsing &amp; manipulating SIP.
+         <p>siplib a powerful SIP library for framing &amp; parsing SIP messages with a fluent API and immutable objects. siplib is part of <a href="http://www.pkts.io">pkts.io</a> and the <a href="http://www.aboutsip.com">Aboutsip</a> family and is designed to be used as a standalone module, either for building your own SIP stack from scratch, or developing your own tools for parsing &amp; manipulating SIP.
             </p>
-            <p>The following example shows how to build a very basic UAS, capable of handling several thousands of calls per second.
+            <p>The following example shows how to parse a SIP message, create a copy of it and by registering functions, some headers are manipulated at the time the SIP message is built.
             </p>
             <p>
-                  {% include basicuas.html %}
+                  {% include intro_example.html %}
+            </p>
+            <p>
+                <ol>
+                   <li>In this example we are creating a SIP message "manually" but of course, in a real-world application you typically would read bytes off of a network stream or perhaps read a set of SIP messages from a file in case you are building a tool of some sort. However, this is just an example so therefore we are doing it the hard way...</li>
+                   <li>Every object in siplib has a frame-method, which will attempt to frame the raw content into that object. This is true for SIP messages, SIP headers, SIP URIs etc. All frame-methods are overloaded and accept Strings, Buffers and byte-arrays.</li>
+                   <li>One very common SIP application is to act as a SIP Proxy, which accepts an incoming message, finds the next hop and forwards the message there. When doing so, the proxy application may add some new headers, drop others, add a new top-most Via-header and manipulate the previous top Via etc. Since everything in siplib is immutable, a copy must be created, which returns a builder that allows you to perform the necessasry operations on the message before finally contstructing it through the build method.</li>
+                </ol>
+            </p>
+            <p>The two resulting SIP messages are shown below, where the first one is the original BYE and the second one is the "proxy BYE". Note how the request URI on line 1 has changed from host 'siplib.io' to 'sipstack.io' due to the lambda expression registered with the <code>onRequestURI</code> method. In fact, this is the preferred way to manipulate any SIP message and the philopshy behind that is further discussed in the <a href="/docs" role="button">docs</a> section. You'll also notice that a similar function was registered for non-system headers through the <code>onHeader</code> method as well as for Via-headers through the <code>onViaHeader</code></p>
+            <p>{% highlight text linenos %}BYE sip:bob@siplib.io:5060 SIP/2.0
+Via: SIP/2.0/UDP 192.168.0.100:5060;rport;branch=z9hG4bK-28976-1-7
+From: alice <sip:alice@aboutsip.com>;tag=28976SIPpTag001
+To: bob <sip:bob@siplib.io>;tag=28972SIPpTag011
+Call-ID: 1-28976@127.0.1.1
+CSeq: 2 BYE
+Contact: sip:alice@192.168.0.100
+Max-Forwards: 70
+Drop-Me: Drop this header on proxy
+Subject: Example BYE Message
+Content-Length: 0
+{% endhighlight %}
+            </p>
+            <p>{% highlight text linenos %}BYE sip:bob@sipstack.io:5060 SIP/2.0
+Via: SIP/2.0/TCP 62.63.64.65;branch=z9hG4bK-a2369a9d-840a-4634-a397-8c99dfffd9ba
+Via: SIP/2.0/UDP 192.168.0.100:5060;rport;branch=z9hG4bK-28976-1-7;received=54.55.56.57
+From: alice <sip:alice@aboutsip.com>;tag=28976SIPpTag001
+To: bob <sip:bob@siplib.io>;tag=28972SIPpTag011
+Call-ID: 1-28976@127.0.1.1
+CSeq: 2 BYE
+Contact: sip:alice@192.168.0.100
+Max-Forwards: 70
+Subject: Example of Proxied BYE Message
+X-SIP-Lib-Version: 2.x
+Record-Route: <sip:62.63.64.65;transport=tcp>
+Content-Length: 0
+{% endhighlight %}
             </p>
             </div>
-            <p>Head over to the <a href="/getstarted" role="button">Get Started</a> guide, which will take you through the above example and in general help you get started with sipstack.io.
+            <p>Head over to the <a href="/getstarted" role="button">Get Started</a> guide, which will take you through how to setup your project for using siplib.io.
             </p> 
          </div>
          </div><!--/span-->

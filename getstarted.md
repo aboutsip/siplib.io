@@ -1,5 +1,5 @@
 ---
-title: The Protocol
+title: Get Started
 layout: info
 menu: getstarted.html
 active_element: getstarted
@@ -7,54 +7,33 @@ active_element: getstarted
 
 <h1 id="getting-started">Getting Started</h1>
 
-This guide will take you through the process of creating a simple UAS application and will guide you through some of the more important concepts of sipstack.io. We will also look at some of the underlying libraries that sipstack.io is using and touch upon some of the reasons why sipstack.io exists to begin with.
+siplib is just a java library and is available through [Maven Central](http://search.maven.org/) and we will be using [Maven](http://maven.apache.org/) in these examples. If you are new to Maven, then check out [Maven: The Complete Reference](http://books.sonatype.com/mvnref-book/reference/), which should have you up and running in no time. If you are using any other build tools, their setup is usually quite similar so should not be hard to adopt the example below to fit your needs.
 
-<h2 id="getting-started-overview">Overview</h2>
+<h3 id="getting-started-maven">Setting up Maven</h3>
 
-Sipstack.io is a framework whose primary goal is to provide you with a light-weight, ready-to-go sipstack with the all the necessary functionality needed by a production-ready SIP application, but without the fuzz that larger application containers typically come with.
-
-All code is opensource and hosted on [github](https://github.com/aboutsip) and contributions are encouraged and highly appreciated.
-
-<h2 id="getting-started-netty">Netty for network access</h2>
-
-Any SIP stack needs a blazingly fast and reliable network stack and [netty.io](http://www.netty.io) is just that. Netty also has a large install base, an active community and over 10 years of development behind it, making it an excellent base for sipstack.io. If you are familiar with Netty, then integrating raw SIP support to your own SIP enabled application should be a breeze.
-
-<h2 id="getting-started-pkts">Pkts.io for parsing</h2>
-
-Equally important to a fast and reliable network stack, is the layer responsible for parsing and framing the data coming off of the network. A poor parsing/framing implementation will cripple the performance of any stack so it is important that this library is written with CPU and memory consumption in mind. Do not copy data if it is avoidable and do everything lazily since many SIP applications rarely need to parse every part of a message anyway. [Pkts.io](http://www.pkts.io) is a library designed with these requirements in mind and is what sipstack.io is using to encode/decode SIP messages and will be the library your application will interact with the most.
-
-<h1 id="app-intro">Your First Application - UAS</h1>
-
-The first application we are going to build is a very basic SIP User Agent Server (UAS). In SIP, a User Agent Client (UAC) generates requests and the UAS terminates the request by sending back a response. It is important to understand that these are roles a UA (User Agent) undertakes at different points in time. Hence, a SIP element can one moment act as a UAC and as a UAS the next. If you want to learn more about SIP, head over to [aboutsip.com](http://www.aboutsip.com) and go through those presentations.
-
-<h2 id="app-maven">Setting up Maven</h2>
-
-sipstack.io is available through [Maven Central](http://search.maven.org/) and we will be using [Maven](http://maven.apache.org/) in these examples. If you are new to Maven, then check out [Maven: The Complete Reference](http://books.sonatype.com/mvnref-book/reference/), which should have you up and running in no time.
-
-<h3 id="app-maven-core-library">Adding Dependencies</h3>
-First, add a property to your POM with the current version of sipstack.io (which is {{ site.sipstackio_version }}):
+First, add a property to your POM with the current version of pkts.io, which is {{ site.pktsio_version }} (remember, siplib is part of pkts.io):
 
 ``` xml
 <properties>
-    <sipstackio.version>{{ site.sipstackio_version }}</sipstackio.version>
+    <pktsio.version>{{ site.pktsio_version }}</pktsio.version>
 </properties>
 ```
 
-Add the sipstack-netty-codec-sip library as a dependency:
+Add the pkts-sip library as a dependency:
 
 ``` xml
 <dependencies>
     <dependency>
-        <groupId>io.sipstack</groupId>
-        <artifactId>sipstack-netty-codec-sip</artifactId>
-        <version>${sipstackio.version}</version>
+        <groupId>io.pkts</groupId>
+        <artifactId>pkts-sip</artifactId>
+        <version>${pktsio.version}</version>
     </dependency>
 </dependencies>
 ```
 
-<h3 id="app-maven-core-library">Configure for Java 8</h3>
+<h3 id="getting-started-java-8">Configure for Java 8</h3>
 
-Sipstack.io requires Java 8 so you need to configure your Maven setup to use Java 8. To do this, you need to configure your compiler, which in Maven is accomplished by re-configuring the `maven-compiler-plugin` like so:
+pkts.io, and therefore siplib, requires Java 8 so you need to configure your Maven setup to use Java 8. To do this, you need to configure your compiler, which in Maven is accomplished by re-configuring the `maven-compiler-plugin` like so:
 
 ```xml
     <build>
@@ -74,80 +53,21 @@ Sipstack.io requires Java 8 so you need to configure your Maven setup to use Jav
     </build>
 ```
 
-Your final pom.xml should look like something like the following [gist](https://gist.github.com/aboutsip/b697b39b692101370415)
 
-Now that we have Maven setup we are ready to start coding.
+Your final pom.xml should look like something like the following [gist](https://gist.github.com/aboutsip/286c89688d488185df09)
 
-<h2 id="app-uas">Build the UAS</h2>
-All applications using sipstack.io starts off the same way, you will have to define and implement a handler, which is handles all I/O events generated by Netty. However, sipstack.io will already have converted the incoming network data into Java objects representing the SIP message so your handler will simply receive a SipMessageEvent with which you can interact.
+<h3 id="getting-started-examples">Examples</h3>
 
-In Netty, you implement a [ChannelInboundHandler](http://netty.io/4.0/api/io/netty/channel/ChannelInboundHandler.html) and override the [channelRead](http://netty.io/4.0/api/io/netty/channel/ChannelInboundHandler.html#channelRead\(io.netty.channel.ChannelHandlerContext, java.lang.Object\)) method to handle the incoming data. For this simple example, and probably for all your SIP applications depending on your needs, we will extend the [SimpleChannelInboundHandler](http://netty.io/4.0/api/io/netty/channel/SimpleChannelInboundHandler.html), which is handling some events we currently do not care about.
+Now that we have Maven setup we are ready to start coding. You can either continue reading in the [docs](/docs) section, which will explain the philosphy behind siplib, how lambda functions are used and show some of the common use cases, or you can just checkout the [examples repository](https://github.com/aboutsip/pkts/tree/master/pkts-examples/src/main/java/io/pkts/examples/siplib) or even the [junit tests](https://github.com/aboutsip/pkts/tree/master/pkts-sip/src/test/java/io/pkts/packet/sip) if you really want to see the raw usage of siplib.
 
-{% include uashandler.html %}
+<h3 id="getting-started-javadoc">Javadoc</h3>
+Javadocs for all releases are hosted by our friends at [javadoc.io](www.javadoc.io) and the current release of pkts.io (and as such siplib) is accessed through the following links:
 
-1. Our `UasHandler` is marked as `Sharable`, which is how we indicate to Netty that this handler can be shared between multiple concurrent network channels. As long as the handler you write is statless, you should use it this way.
-1. We are extending the [SimpleChannelInboundHandler](http://netty.io/4.0/api/io/netty/channel/SimpleChannelInboundHandler.html) helper class as opposed to implement the raw [ChannelInboundHandler](http://netty.io/4.0/api/io/netty/channel/ChannelInboundHandler.html), which is enough for this basic implementation. Also, we indicate the type we are going to handle in our read-method as a [SipMessageEvent](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/SipMessageEvent.html). In all applications you write on top of the sipstack.io framework, this will always be true. The underlying stack, as we will wire up soon, will convert the raw network data into a [SipMessageEvent](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/SipMessageEvent.html).
-1. Since we are using the [SimpleChannelInboundHandler](http://netty.io/4.0/api/io/netty/channel/SimpleChannelInboundHandler.html)as our base class, we will override the `channelRead0` method instead of the `channelRead` one. All SIP messages that is received by the stack will be delivered to this method and is also where you will put your application logic.
-1. The [SipMessageEvent](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/SipMessageEvent.html) contains the actual [SipMessage](http://static.javadoc.io/io.pkts/pkts-sip/{{ site.pktsio_version }}/io/pkts/packet/sip/SipMessage.html)
-1. In this very simple UAS, we will always simply generate a 200 OK to any [SipRequest](http://static.javadoc.io/io.pkts/pkts-sip/{{ site.pktsio_version }}/io/pkts/packet/sip/SipRequest.html) except for ACK, which is the only request in SIP that does not generate a response. Therefore, we will simply check if the message is an ACK and if it is, then we are done.
-1. So, check if the message is a request and if so, create a 200 OK and send it back using the same channel over which the SIP message was received in the first place. You always want to use the [Connection](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/Connection.html) over which the message came in on since doing so will ensure that, if possible, the same underlying TCP connection will be re-used or if the message came in over UDP, the message will be sent back to the same address from which it came.
+ * [siplib](http://www.javadoc.io/doc/io.pkts/pkts-sip/{{page.pktsio_version}})
 
-That is all that is needed for creating your first basic SIP application. The only thing that is left is to wire up the actual network stack, specify if we want to listen on UDP, TCP (or both) and add our `UASHandler` into the pipeline.
+<h3 id="getting-started-contributing">Javadoc</h3>
+Contributions are more than welcome and highly encouraged. Everything in siplib are following the general guidelines of Maven so if you are familiar with Maven you should have no problem getting started. Since siplib is part of pkts.io, please head over to that project site for a fuller description of how you can [contribute](http://www.aboutsip.com/pktsio/#contributing).
 
-<h2 id="app-netty">Wire it all up</h2> 
+<h1 id="license">License</h1>
+pkts.io and all projects under aboutsip.com are released under the terms of the <a href="http://en.wikipedia.org/wiki/MIT_License">MIT license
 
-We need a `main` method for our program and we also need to wire up our handler with the rest of the stack. In Netty, this is accomplished by inserting the handler into a pipeline, which we will see shortly. Also, we need to insert the handlers that encode and decodes SIP messages into that very same pipeline. Those encoders/decoders are provided by sipstack.io and therefore not something you have to worry about. 
-
-{% include uasmain.html %}
-
-1. First off is to create an instance of our `UASHandler`.
-1. The [NioEventLoopGroup](http://netty.io/4.0/api/io/netty/channel/nio/NioEventLoopGroup.html) is a multithreaded event loop that handles I/O operation and there are different groups used for different purposes. Head over to [Netty](http://netty.io) for the details.
-1. [Bootstrap](http://netty.io/4.0/api/io/netty/bootstrap/Bootstrap.html) is a Netty helper class to setup and configure a listening point. Netty provides different boostraps for different usages but for UDP, this is the one to use.
-1. Now it is starting to get interesting. This is where you configure the decoder to use for the incoming data. Sipstack.io is providing two kinds of decoders, one for stream based protocols (such as TCP) and one for datagram based protocols (such as UDP). Since we are wiring up the stack to use UDP we will be inserting the [SipMessageDatagramDecoder](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/SipMessageDatagramDecoder.html) into the pipeline.
-1. For encoding a [SipMessage](http://static.javadoc.io/io.pkts/pkts-sip/{{ site.pktsio_version }}/io/pkts/packet/sip/SipMessage.html) back to bytes that can be pushed out to the network again, sipstack.io provides the [SipMessageEncoder](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/SipMessageEncoder.html). The same encoder will be used for both UDP and TCP so this will always be inserted into the pipe no matter on what underlying protocol you choose.
-1. And finally we will insert our own `UASHandler` last into the pipeline. What we have done now is to configure a pipeline of handlers that will be invoked by Netty one at a time and along the way, the original raw data will be transformed into different representations. For incoming data, the decoder will transform the bytes into a [SipMessageEvent](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/SipMessageEvent.html), which our handler later can work with. When we write a [SipMessage](http://static.javadoc.io/io.pkts/pkts-sip/{{ site.pktsio_version }}/io/pkts/packet/sip/SipMessage.html) back to the [Connection](http://static.javadoc.io/io.sipstack/sipstack-netty-codec-sip/{{ site.sipstackio_version }}/io/sipstack/netty/codec/sip/Connection.html), the encoder will take care of the details around converting that message back to bytes, which is then handed off to the netty stack for transmission across the network.
-1. The last part is simply to specify the address you wish to listen to...
-1. and then bind to it
-
-That is all there is to it and you have now created a simple UAS that is capable of handling several thousands of calls per second. Granted, the application really doesn't do much but it illustrates the basics of sipstack.io but let's finish everything off by building a jar out of our project, run the application and then send some test traffic to it.
-
-<h2 id="app-fat-jar">Build a fat jar</h2>
-
-We recommend that you build your sipstack.io applications as “fat” JAR files — single .jar files which contain *all* of the .class files required to run your application. This allows you to build a single deployable artifact which you can promote from your staging environment to your QA environment to your production environment without worrying about differences in installed libraries. To start building your UAS application as a fat JAR, we need to configure a Maven plugin called `maven-shade`. In the `<build><plugins>` section of your pom.xml file, add this:
-
-{% include fatjarmaven.html %}
-
-This configures Maven to do a couple of things during its package phase:
-
-* Produce a `pom.xml` file which doesn’t include dependencies for the libraries whose contents are included in the fat JAR.
-* Exclude all digital signatures from signed JARs. If you don’t, then Java considers the signature invalid and won’t load or run your JAR file.
-* Collate the various `META-INF/services entries` in the JARs instead of overwriting them. 
-* Set `com.example.UAS` as the JAR’s `MainClass`. This will allow you to run the JAR using `java -jar`. Of course, change the main class to match that of your UAS. Most likely, you have a different packagename. 
-
-<h2 id="app-run-it">Run your application</h2>
-
-To run your application, simply issue the following command in your project folder:
-
-```
-java -jar target/uas-0.0.1-SNAPSHOT.jar
-```
-
-and that is all there is to it. The stack is up and running, listening on localhost:5060 and ready to accept traffic. So let's send some traffic!
-
-
-<h2 id="app-send-traffic">Send some traffic!</h2>
-
-There are several ways in which you could send test traffic to your application. One of the more common tools for testing SIP related applications is [SIPp](http://sipp.sourceforge.net/), a sip performance testing tool and that is what we will use. Download and install SIPp for your local environment and then issue the following command:
-
-```
-sipp -sn uac 127.0.0.1:5060
-```
-
-This will start SIPp and will execute the built in UAC scenario (remember, we built a UAS) and will send traffic to port 5060 on localhost. By default, sipp will use UDP as the transport and will send 10 requests/second. If you want to send more traffic, simply press `+` for increase the calls/second with 1 or `*` to increase it with 10 so go ahead, hit `*` a few times and you will be suprised how much traffic your simple UAS can take!
-
-
-<h2 id="app-next-steps">Next Steps</h2>
-
-Congratulations! You just created a first small SIP application using sipstack.io. Even though the application itself was small, it illustrates how to cofigure the network stack and how to write a handler, which you must always do for every application you write. A good next step is to look at how to write a stateless proxy, something that is a little more useful than our UAS and then continue with writing a SIP registrar in order to allow SIP clients register with your service. You should also checkout how to configure other protocols, such as TCP, since all SIP applications must handle these two protocols at the very least.
-
-You will find the answers to all of the above, and more, in the [document](/docs) section.
