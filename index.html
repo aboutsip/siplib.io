@@ -26,7 +26,7 @@ layout: default
                 </ol>
             </p>
             <p>The two resulting SIP messages are shown below, where the first one is the original BYE and the second one is the "proxy BYE". Note how the request URI on line 1 has changed from host 'siplib.io' to 'sipstack.io' due to the lambda expression registered with the <code>onRequestURI</code> method. In fact, this is the preferred way to manipulate any SIP message and the philopshy behind that is further discussed in the <a href="/docs" role="button">docs</a> section. You'll also notice that a similar function was registered for non-system headers through the <code>onHeader</code> method as well as for Via-headers through the <code>onViaHeader</code></p>
-            <p>{% highlight text linenos %}BYE sip:bob@siplib.io:5060 SIP/2.0
+            <p>{% highlight text %}BYE sip:bob@siplib.io:5060 SIP/2.0
 Via: SIP/2.0/UDP 192.168.0.100:5060;rport;branch=z9hG4bK-28976-1-7
 From: alice <sip:alice@aboutsip.com>;tag=28976SIPpTag001
 To: bob <sip:bob@siplib.io>;tag=28972SIPpTag011
@@ -39,7 +39,7 @@ Subject: Example BYE Message
 Content-Length: 0
 {% endhighlight %}
             </p>
-            <p>{% highlight text linenos %}BYE sip:bob@sipstack.io:5060 SIP/2.0
+            <p>{% highlight text %}BYE sip:bob@sipstack.io:5060 SIP/2.0
 Via: SIP/2.0/TCP 62.63.64.65;branch=z9hG4bK-a2369a9d-840a-4634-a397-8c99dfffd9ba
 Via: SIP/2.0/UDP 192.168.0.100:5060;rport;branch=z9hG4bK-28976-1-7;received=54.55.56.57
 From: alice <sip:alice@aboutsip.com>;tag=28976SIPpTag001
